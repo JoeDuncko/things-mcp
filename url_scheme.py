@@ -1,3 +1,5 @@
+import base64
+import json
 import urllib.parse
 import webbrowser
 import subprocess
@@ -44,6 +46,17 @@ def construct_url(command: str, params: Dict[str, Any]) -> str:
         url += "?" + "&".join(encoded_params)
     
     return url
+
+
+def construct_json_url(data: Dict[str, Any]) -> str:
+    """Construct a Things JSON URL.
+
+    The Things JSON URL scheme expects the payload to be base64 encoded
+    and then URL encoded.
+    """
+    json_str = json.dumps(data)
+    encoded = base64.b64encode(json_str.encode()).decode()
+    return f"things:///json?data={urllib.parse.quote(encoded)}"
 
 def add_todo(title: str, notes: Optional[str] = None, when: Optional[str] = None,
              deadline: Optional[str] = None, tags: Optional[list[str]] = None,
@@ -147,3 +160,30 @@ def show(id: str, query: Optional[str] = None, filter_tags: Optional[list[str]] 
 def search(query: str) -> str:
     """Construct URL to perform a search."""
     return construct_url('search', {'query': query})
+
+
+def add_heading(project_id: str, title: str, heading_id: str) -> str:
+    """Construct URL to create a heading within a project."""
+    data = {
+        'operation': 'create',
+        'type': 'heading',
+        'project-id': project_id,
+        'uuid': heading_id,
+        'attributes': {
+            'title': title
+        }
+    }
+    return construct_json_url(data)
+
+
+def delete_heading(heading_id: str) -> str:
+    """Construct URL to archive (delete) a heading."""
+    data = {
+        'operation': 'update',
+        'type': 'heading',
+        'id': heading_id,
+        'attributes': {
+            'archived': True
+        }
+    }
+    return construct_json_url(data)

@@ -1,5 +1,6 @@
 from typing import List
 import logging
+import uuid
 import things
 from fastmcp import FastMCP
 from formatters import format_todo, format_project, format_area, format_tag
@@ -393,6 +394,33 @@ async def update_project(
     )
     url_scheme.execute_url(url)
     return f"Updated project with ID: {id}"
+
+@mcp.tool
+async def add_heading(project_id: str, title: str) -> str:
+    """Create a new heading within a project."""
+    project = things.get(project_id)
+    if not project or project.get('type') != 'project':
+        return f"Error: Invalid project UUID '{project_id}'"
+
+    heading_uuid = str(uuid.uuid4())
+    url = url_scheme.add_heading(project_id=project_id, title=title, heading_id=heading_uuid)
+    url_scheme.execute_url(url)
+    return heading_uuid
+
+@mcp.tool
+async def delete_heading(heading_id: str) -> str:
+    """Archive a heading if all child todos are completed or canceled."""
+    heading = things.get(heading_id)
+    if not heading or heading.get('type') != 'heading':
+        return f"Error: Invalid heading UUID '{heading_id}'"
+
+    todos = things.todos(heading=heading_id)
+    if todos and any(todo.get('status') not in ('completed', 'canceled') for todo in todos):
+        return "Error: Cannot delete heading with active to-dos"
+
+    url = url_scheme.delete_heading(heading_id)
+    url_scheme.execute_url(url)
+    return f"Archived heading with ID: {heading_id}"
 
 @mcp.tool
 async def show_item(

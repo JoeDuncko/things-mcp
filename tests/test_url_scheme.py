@@ -3,7 +3,8 @@ from unittest.mock import patch, Mock
 import subprocess
 from url_scheme import (
     execute_url, construct_url, add_todo, add_project,
-    update_todo, update_project, show, search
+    update_todo, update_project, show, search,
+    add_heading, delete_heading
 )
 
 
@@ -280,3 +281,33 @@ class TestSearch:
         """Test search with special characters."""
         url = search("test & query + special")
         assert "query=test%20%26%20query%20%2B%20special" in url
+
+
+class TestHeadingOperations:
+    """Tests for heading creation and deletion."""
+
+    def decode_url(self, url: str) -> dict:
+        import base64
+        import urllib.parse
+        import json
+
+        data = url.split("data=")[1]
+        decoded = base64.b64decode(urllib.parse.unquote(data)).decode()
+        return json.loads(decoded)
+
+    def test_add_heading(self):
+        url = add_heading("project-123", "My Heading", "heading-123")
+        payload = self.decode_url(url)
+        assert payload["operation"] == "create"
+        assert payload["type"] == "heading"
+        assert payload["project-id"] == "project-123"
+        assert payload["uuid"] == "heading-123"
+        assert payload["attributes"]["title"] == "My Heading"
+
+    def test_delete_heading(self):
+        url = delete_heading("heading-123")
+        payload = self.decode_url(url)
+        assert payload["operation"] == "update"
+        assert payload["type"] == "heading"
+        assert payload["id"] == "heading-123"
+        assert payload["attributes"]["archived"] is True

@@ -189,6 +189,8 @@ Then restart Claude.
 - `add-project` - Create a new project
 - `update-todo` - Update an existing todo
 - `update-project` - Update an existing project
+- `add-heading` - Create a new heading within a project
+- `delete-heading` - Delete (archive) an existing heading
 - `show-item` - Show a specific item or list in Things
 - `search-items` - Search for items in Things
 
@@ -211,6 +213,13 @@ Then restart Claude.
 
 ### get-recent
 - `period` - Time period (e.g., '3d', '1w', '2m', '1y')
+
+### add-heading
+- `project_id` - UUID of the parent project
+- `title` - Heading title
+
+### delete-heading
+- `heading_id` - UUID of the heading to delete
 
 ## Development
 

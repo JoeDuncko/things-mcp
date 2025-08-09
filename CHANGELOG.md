@@ -7,3 +7,4 @@
 - **Comprehensive Unit Test Suite**: Added unit tests covering URL construction and data formatting functions
 - **Moving Todos Between Projects**: Handle moving projects from one project to another project (thanks @underlow)
 - **Enhanced README**: Improved installation instructions with clearer step-by-step process
+- **Heading Management**: Added support for creating and deleting headings through the MCP server
