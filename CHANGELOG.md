@@ -8,3 +8,4 @@
 - **Moving Todos Between Projects**: Handle moving projects from one project to another project (thanks @underlow)
 - **Enhanced README**: Improved installation instructions with clearer step-by-step process
 - **Heading Management**: Added support for creating and deleting headings through the MCP server
+- **Heading JSON Fixes**: Correct JSON encoding for heading operations and expose URL errors when execution fails

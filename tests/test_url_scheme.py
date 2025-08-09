@@ -28,9 +28,10 @@ class TestExecuteUrl:
     def test_execute_url_fallback(self, mock_webbrowser, mock_run):
         """Test fallback to webbrowser when osascript fails."""
         mock_run.side_effect = subprocess.CalledProcessError(1, 'osascript')
-        
+        mock_webbrowser.return_value = True
+
         execute_url("things:///add?title=Test")
-        
+
         mock_webbrowser.assert_called_once_with("things:///add?title=Test")
 
 
@@ -287,17 +288,16 @@ class TestHeadingOperations:
     """Tests for heading creation and deletion."""
 
     def decode_url(self, url: str) -> dict:
-        import base64
         import urllib.parse
         import json
 
         data = url.split("data=")[1]
-        decoded = base64.b64decode(urllib.parse.unquote(data)).decode()
+        decoded = urllib.parse.unquote(data)
         return json.loads(decoded)
 
     def test_add_heading(self):
         url = add_heading("project-123", "My Heading", "heading-123")
-        payload = self.decode_url(url)
+        payload = self.decode_url(url)[0]
         assert payload["operation"] == "create"
         assert payload["type"] == "heading"
         assert payload["project-id"] == "project-123"
@@ -306,7 +306,7 @@ class TestHeadingOperations:
 
     def test_delete_heading(self):
         url = delete_heading("heading-123")
-        payload = self.decode_url(url)
+        payload = self.decode_url(url)[0]
         assert payload["operation"] == "update"
         assert payload["type"] == "heading"
         assert payload["id"] == "heading-123"

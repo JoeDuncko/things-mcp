@@ -1,4 +1,3 @@
-import base64
 import json
 import urllib.parse
 import webbrowser
@@ -10,12 +9,13 @@ def execute_url(url: str) -> None:
     """Execute a Things URL without bringing Things to the foreground."""
     try:
         subprocess.run([
-            'osascript', '-e', 
+            'osascript', '-e',
             f'tell application "Things3" to open location "{url}"'
         ], check=True, capture_output=True, text=True)
-    except subprocess.CalledProcessError:
+    except subprocess.CalledProcessError as e:
         # Fallback to webbrowser if osascript fails
-        webbrowser.open(url)
+        if not webbrowser.open(url):
+            raise RuntimeError(f"Failed to execute Things URL: {url}") from e
 
 def construct_url(command: str, params: Dict[str, Any]) -> str:
     """Construct a Things URL from command and parameters."""
@@ -47,15 +47,14 @@ def construct_url(command: str, params: Dict[str, Any]) -> str:
     return url
 
 
-def construct_json_url(data: Dict[str, Any]) -> str:
+def construct_json_url(data: list[Dict[str, Any]]) -> str:
     """Construct a Things JSON URL.
 
-    The Things JSON URL scheme expects the payload to be base64 encoded
-    and then URL encoded.
+    The Things JSON URL scheme expects the payload to be an array of
+    objects with all whitespace removed before URL encoding.
     """
-    json_str = json.dumps(data)
-    encoded = base64.b64encode(json_str.encode()).decode()
-    return f"things:///json?data={urllib.parse.quote(encoded)}"
+    json_str = json.dumps(data, separators=(",", ":"))
+    return f"things:///json?data={urllib.parse.quote(json_str)}"
 
 def add_todo(title: str, notes: Optional[str] = None, when: Optional[str] = None,
              deadline: Optional[str] = None, tags: Optional[list[str]] = None,
@@ -163,7 +162,7 @@ def search(query: str) -> str:
 
 def add_heading(project_id: str, title: str, heading_id: str) -> str:
     """Construct URL to create a heading within a project."""
-    data = {
+    data = [{
         'operation': 'create',
         'type': 'heading',
         'project-id': project_id,
@@ -171,19 +170,19 @@ def add_heading(project_id: str, title: str, heading_id: str) -> str:
         'attributes': {
             'title': title
         }
-    }
+    }]
     return construct_json_url(data)
 
 
 def delete_heading(heading_id: str) -> str:
     """Construct URL to archive (delete) a heading."""
-    data = {
+    data = [{
         'operation': 'update',
         'type': 'heading',
         'id': heading_id,
         'attributes': {
             'archived': True
         }
-    }
+    }]
     return construct_json_url(data)
 

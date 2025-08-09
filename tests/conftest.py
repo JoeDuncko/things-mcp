@@ -22,6 +22,24 @@ if "things" not in sys.modules:
     )
     sys.modules["things"] = things_stub
 
+if "fastmcp" not in sys.modules:
+    class _FastMCPStub:
+        def __init__(self, name: str):
+            self.name = name
+
+        def tool(self, func=None, **kwargs):
+            def decorator(f):
+                return f
+            if func:
+                return decorator(func)
+            return decorator
+
+        def run(self):
+            pass
+
+    fastmcp_stub = types.SimpleNamespace(FastMCP=_FastMCPStub)
+    sys.modules["fastmcp"] = fastmcp_stub
+
 
 @pytest.fixture
 def mock_todo():

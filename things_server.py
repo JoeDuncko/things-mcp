@@ -404,7 +404,11 @@ async def add_heading(project_id: str, title: str) -> str:
 
     heading_uuid = str(uuid.uuid4())
     url = url_scheme.add_heading(project_id=project_id, title=title, heading_id=heading_uuid)
-    url_scheme.execute_url(url)
+    try:
+        url_scheme.execute_url(url)
+    except Exception as e:
+        logger.error("Failed to execute Things URL", exc_info=True)
+        return f"Error: Failed to execute Things URL. URL: {url}. Reason: {e}"
     return heading_uuid
 
 @mcp.tool
@@ -419,7 +423,11 @@ async def delete_heading(heading_id: str) -> str:
         return "Error: Cannot delete heading with active to-dos"
 
     url = url_scheme.delete_heading(heading_id)
-    url_scheme.execute_url(url)
+    try:
+        url_scheme.execute_url(url)
+    except Exception as e:
+        logger.error("Failed to execute Things URL", exc_info=True)
+        return f"Error: Failed to execute Things URL. URL: {url}. Reason: {e}"
     return f"Archived heading with ID: {heading_id}"
 
 @mcp.tool
