@@ -1,5 +1,27 @@
+import sys
+import types
 import pytest
 from unittest.mock import Mock, patch
+
+if "things" not in sys.modules:
+    things_stub = types.SimpleNamespace(
+        inbox=lambda: [],
+        today=lambda: [],
+        upcoming=lambda: [],
+        anytime=lambda: [],
+        someday=lambda: [],
+        last=lambda period, status=None: [],
+        trash=lambda: [],
+        todos=lambda *args, **kwargs: [],
+        projects=lambda *args, **kwargs: [],
+        areas=lambda *args, **kwargs: [],
+        tags=lambda *args, **kwargs: [],
+        get=lambda uuid: None,
+        search=lambda query: [],
+        token=lambda: None,
+    )
+    sys.modules["things"] = things_stub
+
 
 @pytest.fixture
 def mock_todo():
@@ -23,6 +45,7 @@ def mock_todo():
         'heading': 'heading-uuid'
     }
 
+
 @pytest.fixture
 def mock_completed_todo():
     """Sample completed todo data for testing."""
@@ -32,8 +55,9 @@ def mock_completed_todo():
         'type': 'to-do',
         'status': 'completed',
         'stop_date': '2024-01-18',
-        'tags': ['done']
+        'tags': ['done'],
     }
+
 
 @pytest.fixture
 def mock_project():
@@ -44,8 +68,9 @@ def mock_project():
         'type': 'project',
         'notes': 'Project description',
         'area': 'area-uuid',
-        'tags': ['important']
+        'tags': ['important'],
     }
+
 
 @pytest.fixture
 def mock_area():
@@ -57,6 +82,7 @@ def mock_area():
         'notes': 'Area description'
     }
 
+
 @pytest.fixture
 def mock_tag():
     """Sample tag data for testing."""
@@ -67,12 +93,14 @@ def mock_tag():
         'shortcut': 'cmd+1'
     }
 
+
 @pytest.fixture
 def mock_things_token():
     """Mock the things.token() function."""
     with patch('things.token') as mock:
         mock.return_value = 'test-auth-token'
         yield mock
+
 
 @pytest.fixture
 def mock_things_get():
@@ -87,6 +115,7 @@ def mock_things_get():
         mock.side_effect = side_effect
         yield mock
 
+
 @pytest.fixture
 def mock_things_todos():
     """Mock the things.todos() function."""
@@ -97,6 +126,7 @@ def mock_things_todos():
         ]
         yield mock
 
+
 @pytest.fixture
 def mock_things_projects():
     """Mock the things.projects() function."""
@@ -106,3 +136,4 @@ def mock_things_projects():
             {'title': 'Project 2', 'uuid': 'project-2'}
         ]
         yield mock
+
